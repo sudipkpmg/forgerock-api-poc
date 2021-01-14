@@ -1,0 +1,28 @@
+camel:
+    component:
+        servlet:
+            mapping:
+                contextPath: /*
+    springboot:
+        name: EcmPocViewDocument
+endpoints:
+    enabled: true
+    health:
+        enabled: true
+logging:
+    config: classpath:logback.xml
+management:
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+runstatus: ForgeRock API POC is running
+server:
+    port: 8080
+openidm:
+    baseurl: https://iam-idm-test.dhs.tn.gov/openidm/managed/
+    username: openidm-admin
+    password: openidm-admin
+spring:
+    application:
+        name: apipoc

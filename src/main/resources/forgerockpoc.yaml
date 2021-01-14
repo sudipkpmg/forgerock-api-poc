@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: ForgeRock API POC
+  version: '1.0'
+  description: ForgeRock API proof-of-concept
+servers:
+  - url: 'https://localhost:8080'
+paths:
+  /list_users:
+    post:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+          description: List of users
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '500'
+                message: Service error
+          description: Service error
+      description: List all users
+  /search:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+          description: Search result
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '500'
+                message: Service error
+          description: Service error
+      description: Search for user(s)
+  /list_roles:
+    post:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleList'
+          description: List of roles
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '500'
+                message: Service error
+          description: Service error
+      description: List all roles
+  /get_role:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetRoleRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleInfo'
+          description: Role information
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '500'
+                message: Service error
+          description: Service error
+      description: Search for user(s)
+components:
+  schemas:
+    UserList:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserInfo'
+    UserInfo:
+      type: object
+      properties:
+        userType:
+          type: string
+        userName:
+          type: string
+        givenName:
+          type: string
+        initial:
+          type: string
+        sn:
+          type: string
+        suffix:
+          type: string
+        nickname:
+          type: string
+        mail:
+          type: string
+        edisonId:
+          type: string
+        accountStatus:
+          type: string
+        mobile:
+          type: string
+        primaryWorkGroup:
+          type: string
+        subGroup:
+          type: string
+        title:
+          type: string
+        position:
+          type: string
+        supervisorId:
+          type: string
+        agencyName:
+          type: string
+        contract:
+          type: string
+        buildingName:
+          type: string
+        postalAddress:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        county:
+          type: string
+        telephoneNumber:
+          type: string
+        effectiveAssignments:
+          type: array
+          items:
+            type: object
+        effectiveRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/EffectiveRoleInfo'
+    EffectiveRoleInfo:
+      type: object
+      properties:
+        _ref:
+          type: string
+    EffectiveAssignmentInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+    SearchRequest:
+      type: object
+      properties:
+        userName:
+          type: string
+        givenName:
+          type: string
+        sn:
+          type: string
+        mail:
+          type: string
+        userType:
+          type: string
+        accountStatus:
+          type: string
+        edisonId:
+          type: string
+    GetRoleRequest:
+      type: object
+      properties:
+        role_id:
+          type: string
+    RoleInfo:
+      type: object
+      properties:
+        _id:
+          type: string
+        _rev:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    RoleList:
+      type: array
+      items:
+        $ref: '#/components/schemas/RoleInfo'
+    ServiceError:
+      type: object
+      properties:
+        code:
+          description: Error code
+          type: string
+        message:
+          description: Error description
+          type: string
