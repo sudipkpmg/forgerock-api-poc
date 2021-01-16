@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.RoleInfo;
-import gov.tn.dhs.forgerock.util.ForgeRockUtil;
 import org.apache.camel.Exchange;
 import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
@@ -27,11 +26,11 @@ public class ListRolesService extends BaseService {
     public void process(Exchange exchange) {
         String urlOverHttps = appProperties.getBaseurl() + "role?_queryFilter=true";
         try {
-            HttpResponse response = ForgeRockUtil.doGet(urlOverHttps);
+            HttpResponse response = doGet(urlOverHttps);
             int statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
                 case 200: {
-                    JsonNode jsonNode = ForgeRockUtil.getJsonFromResponse(response);
+                    JsonNode jsonNode = getJsonFromResponse(response);
                     ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
                     List<RoleInfo> roleInfoList = new ArrayList<>();
                     for (JsonNode roleNode : resultNode) {

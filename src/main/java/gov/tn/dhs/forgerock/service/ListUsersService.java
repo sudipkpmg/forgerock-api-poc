@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.UserInfo;
-import gov.tn.dhs.forgerock.util.ForgeRockUtil;
 import org.apache.camel.Exchange;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -26,30 +25,26 @@ public class ListUsersService extends BaseService {
     }
 
     public void process(Exchange exchange) {
-//        String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=true";
-        String urlOverHttps = appProperties.getBaseurl() + "user?_queryId=query-all";
+        String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=true";
+//        String urlOverHttps = appProperties.getBaseurl() + "user?_queryId=query-all";
         try {
-            HttpResponse response = ForgeRockUtil.doGet(urlOverHttps);
+            HttpResponse response = doGet(urlOverHttps);
             int statusCode = response.getStatusLine().getStatusCode();
-            switch (statusCode) {
-                case 200: {
-                    JsonNode jsonNode = ForgeRockUtil.getJsonFromResponse(response);
-                    ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
-                    List<UserInfo> userInfoList = new ArrayList<>();
-                    for (JsonNode userNode : resultNode) {
-                        UserInfo userInfo = UserInfo.getUserInfo(userNode);
-                        userInfoList.add(userInfo);
-                    }
-                    setupResponse(exchange, "200", userInfoList);
-                    break;
+            if (statusCode == 200) {
+                JsonNode jsonNode = getJsonFromResponse(response);
+                ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
+                List<UserInfo> userInfoList = new ArrayList<>();
+                for (JsonNode userNode : resultNode) {
+                    UserInfo userInfo = UserInfo.getUserInfo(userNode);
+                    userInfoList.add(userInfo);
                 }
-                default: {
-                    String reasonPhrase = response.getStatusLine().getReasonPhrase();
-                    String code = Integer.toString(response.getStatusLine().getStatusCode());
-                    logger.info("response: {}", EntityUtils.toString(response.getEntity()));
-                    setupError(code, reasonPhrase);
-                    break;
-                }
+                setupResponse(exchange, "200", userInfoList);
+            } else {
+                String reasonPhrase = response.getStatusLine().getReasonPhrase();
+                String code = Integer.toString(response.getStatusLine().getStatusCode());
+                String responseContent = EntityUtils.toString(response.getEntity());
+                logger.info("response: {}", responseContent);
+                setupError(code, reasonPhrase);
             }
         } catch (IOException e) {
             setupError("500", "Service error");

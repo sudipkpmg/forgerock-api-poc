@@ -20,8 +20,8 @@ runstatus: ForgeRock API POC is running
 server:
     port: 8080
 openidm:
-#    baseurl: https://iam-idm-test.dhs.tn.gov/openidm/managed/
-    baseurl: https://iam-uat.dhs.tn.gov/openidm/managed/
+    baseurl: https://iam-idm-test.dhs.tn.gov/openidm/managed/
+#    baseurl: https://iam-uat.dhs.tn.gov/openidm/managed/
     username: openidm-admin
     password: openidm-admin
 spring:

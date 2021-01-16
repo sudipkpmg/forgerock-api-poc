@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.SearchRequest;
 import gov.tn.dhs.forgerock.model.UserInfo;
-import gov.tn.dhs.forgerock.util.ForgeRockUtil;
 import org.apache.camel.Exchange;
 import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
@@ -31,11 +30,11 @@ public class SearchService extends BaseService {
         logger.info("queryFilter = [{}]", queryFilter);
         String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=" + queryFilter;
         try {
-            HttpResponse response = ForgeRockUtil.doGet(urlOverHttps);
+            HttpResponse response = doGet(urlOverHttps);
             int statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
                 case 200: {
-                    JsonNode jsonNode = ForgeRockUtil.getJsonFromResponse(response);
+                    JsonNode jsonNode = getJsonFromResponse(response);
                     ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
                     List<UserInfo> userInfoList = new ArrayList<>();
                     for (JsonNode userNode : resultNode) {
