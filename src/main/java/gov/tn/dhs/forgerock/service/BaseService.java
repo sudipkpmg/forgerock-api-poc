@@ -69,7 +69,7 @@ public abstract class BaseService {
     protected HttpResponse doGet(String url) throws IOException {
         long t1;
         HttpResponse response;
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        try (CloseableHttpClient httpClient = HttpClients.custom().disableContentCompression().build()) {
             HttpGet getMethod = new HttpGet(url);
             getMethod.addHeader(OPENIDM_USERNAME_HEADER, appProperties.getOpenidmUsername());
             getMethod.addHeader(OPENIDM_PASSWORD_HEADER, appProperties.getOpenidmPassword());
@@ -86,6 +86,7 @@ public abstract class BaseService {
 
     protected JsonNode getJsonFromResponse(HttpResponse response) throws IOException {
         HttpEntity entity = response.getEntity();
+        logger.info("entity: {}", entity.toString());
         String jsonString = EntityUtils.toString(entity);
         logger.info("JSON response received: {}", jsonString);
         ObjectMapper objectMapper = new ObjectMapper();

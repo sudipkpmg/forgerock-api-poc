@@ -25,8 +25,8 @@ public class ListUsersService extends BaseService {
     }
 
     public void process(Exchange exchange) {
-        String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=true";
-//        String urlOverHttps = appProperties.getBaseurl() + "user?_queryId=query-all";
+//        String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=true";
+        String urlOverHttps = appProperties.getBaseurl() + "user?_queryId=query-all";
         try {
             HttpResponse response = doGet(urlOverHttps);
             int statusCode = response.getStatusLine().getStatusCode();
