@@ -6,11 +6,11 @@ import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.SearchRequest;
 import gov.tn.dhs.forgerock.model.UserInfo;
 import org.apache.camel.Exchange;
-import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +30,13 @@ public class SearchService extends BaseService {
         logger.info("queryFilter = [{}]", queryFilter);
         String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=" + queryFilter;
         try {
-            HttpResponse response = doGet(urlOverHttps);
-            int statusCode = response.getStatusLine().getStatusCode();
+            HttpsURLConnection connection = doGet(urlOverHttps);
+            int statusCode = connection.getResponseCode();
             switch (statusCode) {
                 case 200: {
-                    JsonNode jsonNode = getJsonFromResponse(response);
+                    String jsonString = getResponseContent(connection);
+                    logger.info("JSON response received: {}", jsonString);
+                    JsonNode jsonNode = getJsonFromResponse(jsonString);
                     ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
                     List<UserInfo> userInfoList = new ArrayList<>();
                     for (JsonNode userNode : resultNode) {
@@ -49,9 +51,7 @@ public class SearchService extends BaseService {
                     break;
                 }
                 default: {
-                    String reasonPhrase = response.getStatusLine().getReasonPhrase();
-                    String code = Integer.toString(response.getStatusLine().getStatusCode());
-                    setupError(code, reasonPhrase);
+                    setupError("500", "Service error");
                     break;
                 }
             }

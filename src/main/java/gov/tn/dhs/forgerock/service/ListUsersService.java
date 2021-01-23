@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.UserInfo;
 import org.apache.camel.Exchange;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +27,12 @@ public class ListUsersService extends BaseService {
 //        String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=true";
         String urlOverHttps = appProperties.getBaseurl() + "user?_queryId=query-all";
         try {
-            HttpResponse response = doGet(urlOverHttps);
-            int statusCode = response.getStatusLine().getStatusCode();
+            HttpsURLConnection connection = doGet(urlOverHttps);
+            int statusCode = connection.getResponseCode();
             if (statusCode == 200) {
-                JsonNode jsonNode = getJsonFromResponse(response);
+                String jsonString = getResponseContent(connection);
+                logger.info("JSON response received: {}", jsonString);
+                JsonNode jsonNode = getJsonFromResponse(jsonString);
                 ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
                 List<UserInfo> userInfoList = new ArrayList<>();
                 for (JsonNode userNode : resultNode) {
@@ -40,11 +41,7 @@ public class ListUsersService extends BaseService {
                 }
                 setupResponse(exchange, "200", userInfoList);
             } else {
-                String reasonPhrase = response.getStatusLine().getReasonPhrase();
-                String code = Integer.toString(response.getStatusLine().getStatusCode());
-                String responseContent = EntityUtils.toString(response.getEntity());
-                logger.info("response: {}", responseContent);
-                setupError(code, reasonPhrase);
+                setupError(Integer.toString(statusCode), "No users found");
             }
         } catch (IOException e) {
             setupError("500", "Service error");

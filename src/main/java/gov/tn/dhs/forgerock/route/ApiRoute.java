@@ -3,7 +3,10 @@ package gov.tn.dhs.forgerock.route;
 import com.fasterxml.jackson.core.JsonParseException;
 import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.exception.ServiceErrorException;
-import gov.tn.dhs.forgerock.model.*;
+import gov.tn.dhs.forgerock.model.GetRoleRequest;
+import gov.tn.dhs.forgerock.model.RoleInfo;
+import gov.tn.dhs.forgerock.model.SearchRequest;
+import gov.tn.dhs.forgerock.model.SimpleMessage;
 import gov.tn.dhs.forgerock.service.*;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -11,7 +14,6 @@ import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component

@@ -8,16 +8,14 @@ import gov.tn.dhs.forgerock.model.ClientError;
 import gov.tn.dhs.forgerock.model.SimpleMessage;
 import gov.tn.dhs.forgerock.util.JsonUtil;
 import org.apache.camel.Exchange;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 public abstract class BaseService {
 
@@ -32,7 +30,7 @@ public abstract class BaseService {
         this.appProperties = appProperties;
     }
 
-    protected abstract void process(Exchange exchange);
+    protected abstract void process(Exchange exchange) throws Exception;
 
     protected void setupResponse(Exchange exchange, String code, Object response) {
         exchange.getIn().setBody(response, response.getClass());
@@ -66,29 +64,35 @@ public abstract class BaseService {
         throw new ServiceErrorException(code, JsonUtil.toJson(clientError));
     }
 
-    protected HttpResponse doGet(String url) throws IOException {
-        long t1;
-        HttpResponse response;
-        try (CloseableHttpClient httpClient = HttpClients.custom().disableContentCompression().build()) {
-            HttpGet getMethod = new HttpGet(url);
-            getMethod.addHeader(OPENIDM_USERNAME_HEADER, appProperties.getOpenidmUsername());
-            getMethod.addHeader(OPENIDM_PASSWORD_HEADER, appProperties.getOpenidmPassword());
-            logger.info("calling URL [{}]", url);
-            t1 = System.currentTimeMillis();
-            response = httpClient.execute(getMethod);
-        }
+    protected HttpsURLConnection doGet(String url) throws IOException {
+        URL connectionUrl = new URL(url);
+        long t1= System.currentTimeMillis();
+        HttpsURLConnection connection = (HttpsURLConnection) connectionUrl.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty(OPENIDM_USERNAME_HEADER, "openidm-admin");
+        connection.setRequestProperty(OPENIDM_PASSWORD_HEADER, "openidm-admin");
+        connection.connect();
         long t2 = System.currentTimeMillis();
         long timeDiff = t2 - t1;
         logger.info("received response from call");
         logger.info("call to URL [{}] took {} ms", url, timeDiff);
-        return response;
+        return connection;
     }
 
-    protected JsonNode getJsonFromResponse(HttpResponse response) throws IOException {
-        HttpEntity entity = response.getEntity();
-        logger.info("entity: {}", entity.toString());
-        String jsonString = EntityUtils.toString(entity);
-        logger.info("JSON response received: {}", jsonString);
+    protected String getResponseContent(HttpsURLConnection con) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer content = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            content.append(inputLine);
+        }
+        in.close();
+        return content.toString();
+    }
+
+
+    protected JsonNode getJsonFromResponse(String jsonString) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonString);
         return jsonNode;

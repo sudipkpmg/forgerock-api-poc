@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.RoleInfo;
 import org.apache.camel.Exchange;
-import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,26 +26,21 @@ public class ListRolesService extends BaseService {
     public void process(Exchange exchange) {
         String urlOverHttps = appProperties.getBaseurl() + "role?_queryFilter=true";
         try {
-            HttpResponse response = doGet(urlOverHttps);
-            int statusCode = response.getStatusLine().getStatusCode();
-            switch (statusCode) {
-                case 200: {
-                    JsonNode jsonNode = getJsonFromResponse(response);
-                    ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
-                    List<RoleInfo> roleInfoList = new ArrayList<>();
-                    for (JsonNode roleNode : resultNode) {
-                        RoleInfo roleInfo = RoleInfo.getRoleInfo(roleNode);
-                        roleInfoList.add(roleInfo);
-                    }
-                    setupResponse(exchange, "200", roleInfoList);
-                    break;
+            HttpsURLConnection connection = doGet(urlOverHttps);
+            int statusCode = connection.getResponseCode();
+            if (statusCode == 200) {
+                String jsonString = getResponseContent(connection);
+                logger.info("JSON response received: {}", jsonString);
+                JsonNode jsonNode = getJsonFromResponse(jsonString);
+                ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
+                List<RoleInfo> roleInfoList = new ArrayList<>();
+                for (JsonNode roleNode : resultNode) {
+                    RoleInfo roleInfo = RoleInfo.getRoleInfo(roleNode);
+                    roleInfoList.add(roleInfo);
                 }
-                default: {
-                    String reasonPhrase = response.getStatusLine().getReasonPhrase();
-                    String code = Integer.toString(response.getStatusLine().getStatusCode());
-                    setupError(code, reasonPhrase);
-                    break;
-                }
+                setupResponse(exchange, "200", roleInfoList);
+            } else {
+                setupError(Integer.toString(statusCode), "No roles found");
             }
         } catch (IOException e) {
             setupError("500", "Service error");

@@ -5,11 +5,11 @@ import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.model.GetRoleRequest;
 import gov.tn.dhs.forgerock.model.RoleInfo;
 import org.apache.camel.Exchange;
-import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 
 @Service
@@ -26,11 +26,13 @@ public class RoleService extends BaseService {
         String roleId = getRoleRequest.getId();
         String urlOverHttps = appProperties.getBaseurl() + "role/" + roleId;
         try {
-            HttpResponse response = doGet(urlOverHttps);
-            int statusCode = response.getStatusLine().getStatusCode();
+            HttpsURLConnection connection = doGet(urlOverHttps);
+            int statusCode = connection.getResponseCode();
             switch (statusCode) {
                 case 200: {
-                    JsonNode jsonNode = getJsonFromResponse(response);
+                    String jsonString = getResponseContent(connection);
+                    logger.info("JSON response received: {}", jsonString);
+                    JsonNode jsonNode = getJsonFromResponse(jsonString);
                     RoleInfo roleInfo = RoleInfo.getRoleInfo(jsonNode);
                     setupResponse(exchange, "200", roleInfo);
                     break;
@@ -40,9 +42,7 @@ public class RoleService extends BaseService {
                     break;
                 }
                 default: {
-                    String reasonPhrase = response.getStatusLine().getReasonPhrase();
-                    String code = Integer.toString(response.getStatusLine().getStatusCode());
-                    setupError(code, reasonPhrase);
+                    setupError("500", "Service error");
                     break;
                 }
             }
