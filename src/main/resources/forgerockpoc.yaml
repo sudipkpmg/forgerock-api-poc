@@ -25,7 +25,7 @@ paths:
                 message: Service error
           description: Service error
       description: List all users
-  /search:
+  /get_user:
     post:
       requestBody:
         content:

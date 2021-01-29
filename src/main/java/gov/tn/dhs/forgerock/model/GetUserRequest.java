@@ -2,7 +2,7 @@ package gov.tn.dhs.forgerock.model;
 
 import java.util.StringJoiner;
 
-public class SearchRequest {
+public class GetUserRequest {
 
     private String userName;
     private String givenName;

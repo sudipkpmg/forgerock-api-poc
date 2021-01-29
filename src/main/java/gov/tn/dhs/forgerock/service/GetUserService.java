@@ -1,9 +1,10 @@
 package gov.tn.dhs.forgerock.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.tn.dhs.forgerock.config.AppProperties;
-import gov.tn.dhs.forgerock.model.GetRoleRequest;
-import gov.tn.dhs.forgerock.model.RoleInfo;
+import gov.tn.dhs.forgerock.model.GetUserRequest;
+import gov.tn.dhs.forgerock.model.UserInfo;
 import org.apache.camel.Exchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,20 +12,23 @@ import org.springframework.stereotype.Service;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
-public class RoleService extends BaseService {
+public class GetUserService extends BaseService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RoleService.class);
+    private static final Logger logger = LoggerFactory.getLogger(GetUserService.class);
 
-    public RoleService(AppProperties appProperties) {
+    public GetUserService(AppProperties appProperties) {
         super(appProperties);
     }
 
     public void process(Exchange exchange) {
-        GetRoleRequest getRoleRequest = exchange.getIn().getBody(GetRoleRequest.class);
-        String roleId = getRoleRequest.getId();
-        String urlOverHttps = appProperties.getBaseurl() + "role/" + roleId;
+        GetUserRequest getUserRequest = exchange.getIn().getBody(GetUserRequest.class);
+        String queryFilter = getUserRequest.getQueryFilter();
+        logger.info("queryFilter = [{}]", queryFilter);
+        String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=" + queryFilter;
         try {
             HttpsURLConnection connection = doGet(urlOverHttps);
             int statusCode = connection.getResponseCode();
@@ -33,12 +37,17 @@ public class RoleService extends BaseService {
                     String jsonString = getResponseContent(connection);
                     logger.info("JSON response received: {}", jsonString);
                     JsonNode jsonNode = getJsonFromResponse(jsonString);
-                    RoleInfo roleInfo = RoleInfo.getRoleInfo(jsonNode);
-                    setupResponse(exchange, "200", roleInfo);
+                    ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
+                    List<UserInfo> userInfoList = new ArrayList<>();
+                    for (JsonNode userNode : resultNode) {
+                        UserInfo userInfo = UserInfo.getUserInfo(userNode);
+                        userInfoList.add(userInfo);
+                    }
+                    setupResponse(exchange, "200", userInfoList);
                     break;
                 }
                 case 404: {
-                    setupError("404", "Role not found");
+                    setupError("404", "User not found");
                     break;
                 }
                 default: {

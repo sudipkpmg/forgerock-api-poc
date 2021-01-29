@@ -5,7 +5,7 @@ import gov.tn.dhs.forgerock.config.AppProperties;
 import gov.tn.dhs.forgerock.exception.ServiceErrorException;
 import gov.tn.dhs.forgerock.model.GetRoleRequest;
 import gov.tn.dhs.forgerock.model.RoleInfo;
-import gov.tn.dhs.forgerock.model.SearchRequest;
+import gov.tn.dhs.forgerock.model.GetUserRequest;
 import gov.tn.dhs.forgerock.model.SimpleMessage;
 import gov.tn.dhs.forgerock.service.*;
 import org.apache.camel.Exchange;
@@ -21,23 +21,23 @@ import java.util.List;
 public class ApiRoute extends RouteBuilder {
 
     private final ListUsersService listUsersService;
-    private final SearchService searchService;
+    private final GetUserService getUserService;
     private final ListRolesService listRolesService;
-    private final RoleService roleService;
+    private final GetRoleService getRoleService;
 
     private final AppProperties appProperties;
 
     public ApiRoute(
             ListUsersService listUsersService,
-            SearchService searchService,
+            GetUserService getUserService,
             ListRolesService listRolesService,
-            RoleService roleService,
+            GetRoleService getRoleService,
             AppProperties appProperties
     ) {
         this.listUsersService = listUsersService;
-        this.searchService = searchService;
+        this.getUserService = getUserService;
         this.listRolesService = listRolesService;
-        this.roleService = roleService;
+        this.getRoleService = getRoleService;
         this.appProperties = appProperties;
     }
 
@@ -85,14 +85,14 @@ public class ApiRoute extends RouteBuilder {
         ;
 
         rest()
-                .post("/search")
-                .type(SearchRequest.class)
+                .post("/get_user")
+                .type(GetUserRequest.class)
                 .outType(List.class)
                 .to("direct:SearchService")
         ;
         from("direct:SearchService")
                 .log("received request to search ...")
-                .bean(searchService)
+                .bean(getUserService)
                 .endRest()
         ;
 
@@ -115,7 +115,7 @@ public class ApiRoute extends RouteBuilder {
         ;
         from("direct:RoleService")
                 .log("received request to get role ...")
-                .bean(roleService)
+                .bean(getRoleService)
                 .endRest()
         ;
 
