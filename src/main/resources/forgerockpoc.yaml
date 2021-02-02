@@ -249,7 +249,7 @@ components:
     GetRoleRequest:
       type: object
       properties:
-        role_id:
+        id:
           type: string
     RoleInfo:
       type: object
