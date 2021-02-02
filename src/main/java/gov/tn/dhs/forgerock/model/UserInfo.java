@@ -1,12 +1,12 @@
 package gov.tn.dhs.forgerock.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+//import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import gov.tn.dhs.forgerock.util.JsonUtil;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserInfo {
 
     private String userType;
