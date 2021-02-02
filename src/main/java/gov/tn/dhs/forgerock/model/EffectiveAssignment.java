@@ -1,6 +1,6 @@
 package gov.tn.dhs.forgerock.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+//import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -8,7 +8,7 @@ import gov.tn.dhs.forgerock.util.JsonUtil;
 
 import java.util.ArrayList;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EffectiveAssignment {
 
     @JsonProperty("_id")
