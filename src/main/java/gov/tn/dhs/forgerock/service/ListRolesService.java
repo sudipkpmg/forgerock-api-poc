@@ -38,9 +38,17 @@ public class ListRolesService extends BaseService {
                     RoleInfo roleInfo = RoleInfo.getRoleInfo(roleNode);
                     roleInfoList.add(roleInfo);
                 }
-                setupResponse(exchange, "200", roleInfoList);
+                if (roleInfoList.isEmpty()) {
+                    setupError("404", "No role found");
+                } else {
+                    setupResponse(exchange, "200", roleInfoList);
+                }
             } else {
-                setupError(Integer.toString(statusCode), "No roles found");
+                if (statusCode == 404) {
+                    setupError("404", "No role found");
+                } else {
+                    setupError("500", "Service error");
+                }
             }
         } catch (IOException e) {
             setupError("500", "Service error");

@@ -28,6 +28,9 @@ public class GetUserService extends BaseService {
         GetUserRequest getUserRequest = exchange.getIn().getBody(GetUserRequest.class);
         String queryFilter = getUserRequest.getQueryFilter();
         logger.info("queryFilter = [{}]", queryFilter);
+        if (queryFilter.isEmpty()) {
+            setupError("400", "No query parameter provided");
+        }
         String urlOverHttps = appProperties.getBaseurl() + "user?_queryFilter=" + queryFilter;
         try {
             HttpsURLConnection connection = doGet(urlOverHttps);
@@ -43,7 +46,11 @@ public class GetUserService extends BaseService {
                         UserInfo userInfo = UserInfo.getUserInfo(userNode);
                         userInfoList.add(userInfo);
                     }
-                    setupResponse(exchange, "200", userInfoList);
+                    if (userInfoList.isEmpty()) {
+                        setupError("404", "User not found");
+                    } else {
+                        setupResponse(exchange, "200", userInfoList);
+                    }
                     break;
                 }
                 case 404: {

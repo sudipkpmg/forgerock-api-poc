@@ -15,6 +15,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserList'
           description: List of users
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '404'
+                message: No user found
+          description: No user found
         '500':
           content:
             application/json:
@@ -40,6 +49,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserList'
           description: Search result
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '400'
+                message: No query parameter provided
+          description: No query parameter provided
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '404'
+                message: User not found
+          description: User not found
         '500':
           content:
             application/json:
@@ -59,6 +86,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleList'
           description: List of roles
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '404'
+                message: No role found
+          description: No role found
         '500':
           content:
             application/json:
@@ -84,6 +120,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoleInfo'
           description: Role information
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '400'
+                message: No query parameter provided
+          description: No query parameter provided
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceError'
+              example:
+                code: '404'
+                message: Role not found
+          description: Role not found
         '500':
           content:
             application/json:
@@ -156,7 +210,7 @@ components:
         effectiveAssignments:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/EffectiveAssignmentInfo'
         effectiveRoles:
           type: array
           items:
@@ -207,6 +261,8 @@ components:
         name:
           type: string
         description:
+          type: string
+        condition:
           type: string
     RoleList:
       type: array

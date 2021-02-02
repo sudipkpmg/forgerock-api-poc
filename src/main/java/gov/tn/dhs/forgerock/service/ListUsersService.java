@@ -39,9 +39,17 @@ public class ListUsersService extends BaseService {
                     UserInfo userInfo = UserInfo.getUserInfo(userNode);
                     userInfoList.add(userInfo);
                 }
-                setupResponse(exchange, "200", userInfoList);
+                if (userInfoList.isEmpty()) {
+                    setupError(Integer.toString(statusCode), "No user found");
+                } else {
+                    setupResponse(exchange, "200", userInfoList);
+                }
             } else {
-                setupError(Integer.toString(statusCode), "No users found");
+                if (statusCode == 404) {
+                    setupError("404", "No user found");
+                } else {
+                    setupError("500", "Service error");
+                }
             }
         } catch (IOException e) {
             setupError("500", "Service error");

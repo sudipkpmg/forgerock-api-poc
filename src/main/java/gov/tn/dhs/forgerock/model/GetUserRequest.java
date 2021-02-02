@@ -69,7 +69,7 @@ public class GetUserRequest {
     }
 
     public String getQueryFilter() {
-        StringJoiner stringJoiner = new StringJoiner("&");
+        StringJoiner stringJoiner = new StringJoiner("+and+");
         addCondition(stringJoiner, "userName", userName);
         addCondition(stringJoiner, "givenName", givenName);
         addCondition(stringJoiner, "sn", sn);

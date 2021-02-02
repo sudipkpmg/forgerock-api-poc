@@ -24,6 +24,9 @@ public class GetRoleService extends BaseService {
     public void process(Exchange exchange) {
         GetRoleRequest getRoleRequest = exchange.getIn().getBody(GetRoleRequest.class);
         String roleId = getRoleRequest.getId();
+        if (roleId == null) {
+            setupError("400", "No query parameter provided");
+        }
         String urlOverHttps = appProperties.getBaseurl() + "role/" + roleId;
         try {
             HttpsURLConnection connection = doGet(urlOverHttps);
