@@ -8,7 +8,7 @@ import gov.tn.dhs.forgerock.util.JsonUtil;
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleInfo {
 
-    @JsonProperty("-id")
+    @JsonProperty("id")
     private String id;
 
     @JsonProperty("_rev")

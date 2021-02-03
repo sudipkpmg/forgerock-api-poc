@@ -11,11 +11,13 @@ import java.util.ArrayList;
 //@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EffectiveAssignment {
 
-    @JsonProperty("_id")
+    @JsonProperty("id")
     private String id;
 
+    @JsonProperty("name")
     private String name;
 
+    @JsonProperty("description")
     private String description;
 
     public String getId() {

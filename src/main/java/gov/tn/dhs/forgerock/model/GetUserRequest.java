@@ -81,7 +81,7 @@ public class GetUserRequest {
     }
 
     private void addCondition(StringJoiner stringJoiner, String fieldName, String fieldValue) {
-        if (fieldValue != null) {
+        if ( (fieldValue != null) && (! fieldValue.trim().isEmpty()) ) {
             stringJoiner.add(fieldName + "+eq+%22" + fieldValue + "%22");
         }
     }

@@ -254,7 +254,7 @@ components:
     RoleInfo:
       type: object
       properties:
-        _id:
+        id:
           type: string
         _rev:
           type: string
