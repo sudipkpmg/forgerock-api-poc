@@ -25,33 +25,44 @@ public class ListRolesService extends BaseService {
 
     public void process(Exchange exchange) {
         String urlOverHttps = appProperties.getBaseurl() + "role?_queryFilter=true";
-        try {
-            HttpsURLConnection connection = doGet(urlOverHttps);
-            int statusCode = connection.getResponseCode();
-            if (statusCode == 200) {
-                String jsonString = getResponseContent(connection);
-                logger.info("JSON response received: {}", jsonString);
-                JsonNode jsonNode = getJsonFromResponse(jsonString);
-                ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
-                List<RoleInfo> roleInfoList = new ArrayList<>();
-                for (JsonNode roleNode : resultNode) {
-                    RoleInfo roleInfo = RoleInfo.getRoleInfo(roleNode);
-                    roleInfoList.add(roleInfo);
-                }
-                if (roleInfoList.isEmpty()) {
-                    setupError("404", "No role found");
+        logger.info("trying [{}]", urlOverHttps);
+        int connectionRetries = 1;
+        boolean resultNotObtained = true;
+        while ((connectionRetries <= appProperties.getServiceCallRetryAttempLimit()) && resultNotObtained) {
+            try {
+                HttpsURLConnection connection = doGet(urlOverHttps);
+                int statusCode = connection.getResponseCode();
+                if (statusCode == 200) {
+                    logger.info("obtained 200 result in attempt {}", connectionRetries);
+                    resultNotObtained = false;
+                    String jsonString = getResponseContent(connection);
+                    logger.info("JSON response received: {}", jsonString);
+                    JsonNode jsonNode = getJsonFromResponse(jsonString);
+                    ArrayNode resultNode = (ArrayNode) jsonNode.get("result");
+                    List<RoleInfo> roleInfoList = new ArrayList<>();
+                    for (JsonNode roleNode : resultNode) {
+                        RoleInfo roleInfo = RoleInfo.getRoleInfo(roleNode);
+                        roleInfoList.add(roleInfo);
+                    }
+                    if (roleInfoList.isEmpty()) {
+                        setupError("404", "No role found");
+                    } else {
+                        setupResponse(exchange, "200", roleInfoList);
+                    }
                 } else {
-                    setupResponse(exchange, "200", roleInfoList);
+                    logger.info("obtained {} result in attempt {}", statusCode, connectionRetries);
+                    connectionRetries++;
+                    if (connectionRetries > appProperties.getServiceCallRetryAttempLimit()) {
+                        if (statusCode == 404) {
+                            setupError("404", "No role found");
+                        } else {
+                            setupError("500", "Service error");
+                        }
+                    }
                 }
-            } else {
-                if (statusCode == 404) {
-                    setupError("404", "No role found");
-                } else {
-                    setupError("500", "Service error");
-                }
+            } catch (IOException e) {
+                setupError("500", "Service error");
             }
-        } catch (IOException e) {
-            setupError("500", "Service error");
         }
     }
 

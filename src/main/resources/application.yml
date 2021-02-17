@@ -17,6 +17,7 @@ management:
             exposure:
                 include: '*'
 runstatus: ForgeRock API POC is running
+serviceCallRetryAttemptLimit: 5
 server:
     port: 8080
 openidm:

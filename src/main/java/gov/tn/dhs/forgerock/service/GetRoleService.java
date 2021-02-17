@@ -28,29 +28,34 @@ public class GetRoleService extends BaseService {
             setupError("400", "No query parameter provided");
         }
         String urlOverHttps = appProperties.getBaseurl() + "role/" + roleId;
-        try {
-            HttpsURLConnection connection = doGet(urlOverHttps);
-            int statusCode = connection.getResponseCode();
-            switch (statusCode) {
-                case 200: {
+        int connectionRetries = 1;
+        boolean resultNotObtained = true;
+        while ((connectionRetries <= appProperties.getServiceCallRetryAttempLimit()) && resultNotObtained) {
+            try {
+                HttpsURLConnection connection = doGet(urlOverHttps);
+                int statusCode = connection.getResponseCode();
+                if (statusCode == 200) {
+                    logger.info("obtained 200 result in attempt {}", connectionRetries);
+                    resultNotObtained = false;
                     String jsonString = getResponseContent(connection);
                     logger.info("JSON response received: {}", jsonString);
                     JsonNode jsonNode = getJsonFromResponse(jsonString);
                     RoleInfo roleInfo = RoleInfo.getRoleInfo(jsonNode);
                     setupResponse(exchange, "200", roleInfo);
-                    break;
+                } else {
+                    logger.info("obtained {} result in attempt {}", statusCode, connectionRetries);
+                    connectionRetries++;
+                    if (connectionRetries > appProperties.getServiceCallRetryAttempLimit()) {
+                        if (statusCode == 404) {
+                            setupError("404", "Role not found");
+                        } else {
+                            setupError("500", "Service error");
+                        }
+                    }
                 }
-                case 404: {
-                    setupError("404", "Role not found");
-                    break;
-                }
-                default: {
-                    setupError("500", "Service error");
-                    break;
-                }
+            } catch (IOException e) {
+                setupError("500", "Service error");
             }
-        } catch (IOException e) {
-            setupError("500", "Service error");
         }
     }
 

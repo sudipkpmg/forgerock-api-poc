@@ -23,6 +23,9 @@ public class AppProperties {
     @Value("${openidm.password}")
     private String openidmPassword;
 
+    @Value("${serviceCallRetryAttemptLimit}")
+    private int serviceCallRetryAttempLimit;
+
     public String getServerPort() {
         return serverPort;
     }
@@ -61,5 +64,13 @@ public class AppProperties {
 
     public void setBaseurl(String baseurl) {
         this.baseurl = baseurl;
+    }
+
+    public int getServiceCallRetryAttempLimit() {
+        return serviceCallRetryAttempLimit;
+    }
+
+    public void setServiceCallRetryAttempLimit(int serviceCallRetryAttempLimit) {
+        this.serviceCallRetryAttempLimit = serviceCallRetryAttempLimit;
     }
 }
